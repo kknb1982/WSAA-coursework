@@ -26,7 +26,6 @@ value_counts = {}
 
 # Shuffle the deck
 url = "https://www.deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1"
-
 response = requests.get(url)
 data = response.json()
 
@@ -39,8 +38,9 @@ response2 = requests.get(url2)
 cards = response2.json()
 
 # Print the value, suit and code of each card drawn
+print("\nYou have drawn the following cards:")
 for card in cards["cards"]:
-    print(card["value"], card["suit"], card["code"])
+    print(f"{card['value']} of {card['suit']}")
 
 # Get the value of the cards
 values = [card["value"] for card in cards["cards"]]
@@ -55,22 +55,26 @@ for value in values:
 # Print the number of cards with the same value
 for value, count in value_counts.items():
     if count > 1:
-        print(f"Congratulations, {count} cards have the value {value}")
+        print(f"\nCongratulations, {count} cards have the value {value}")
         
 # Sorts the values according to the value mapping
 sorted_values = sorted(values, key=lambda x: value_mapping[x]) 
 
 # Check for a straight
+is_straight = True
+
 for i in range(len(sorted_values) - 1):
-    if value_mapping[sorted_values[i]] + 1 != value_mapping[sorted_values[i + 1]]: # checks if the next value is one more than the current value
+    if value_mapping[sorted_values[i]] + 1 != value_mapping[sorted_values[i + 1]]: 
+        is_straight = False
         break
-    else:
-        print("Congratulations! The hand is a straight.")
+
+if is_straight:
+    print("\nCongratulations! The hand is a straight.")
 
 # Check all of the same suit
 suits = [card["suit"] for card in cards["cards"]]
 if all(suit == suits[0] for suit in suits):
-    print("Congratulations! All cards are of the same suit.")
+    print("\n Congratulations! All cards are of the same suit.")
 
 
 
