@@ -4,42 +4,6 @@
 import requests
 import json
 
-url = "https://www.deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1"
-
-response = requests.get(url)
-data = response.json()
-
-deck_id = data["deck_id"] # This will get the deck id from the json response
-print(deck_id)
-
-url2 = f"https://deckofcardsapi.com/api/deck/{deck_id}/draw/?count=5" # This will draw 5 cards from the deck
-print (url2)
-response2 = requests.get(url2)
-cards = response2.json()
-
-
-for card in cards["cards"]:
-    print(card["value"], card["suit"], card["code"]) # This will print the value, suit and code of each card drawn
-
-# Get the value of the cards
-values = [card["value"] for card in cards["cards"]]
-
-value_counts = {} # Create an empty dictionary to store the value counts
-
-# Count the number of cards with the same value
-for value in values:
-    if value in value_counts:
-        value_counts[value] += 1
-    else:
-        value_counts[value] = 1
-
-# Print the number of cards with the same value
-for value, count in value_counts.items():
-    if count > 1:
-        print(f"{count} cards have the value {value}")
-        
-# Check for a straight
-
 ## Set a mapping for the values
 value_mapping = {
     "2": 2,
@@ -57,21 +21,56 @@ value_mapping = {
     "ACE": 14
 }
 
-sorted_values = sorted(values, key=lambda x: value_mapping[x]) # sorts the values according to the value mapping
-print(f"The sorted values are: {sorted_values}")
+# Create an empty dictionary to store the value counts
+value_counts = {} 
 
+# Shuffle the deck
+url = "https://www.deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1"
+
+response = requests.get(url)
+data = response.json()
+
+# Get the deck id
+deck_id = data["deck_id"]
+
+# Use the deck id to draw 5 cards
+url2 = f"https://deckofcardsapi.com/api/deck/{deck_id}/draw/?count=5" 
+response2 = requests.get(url2)
+cards = response2.json()
+
+# Print the value, suit and code of each card drawn
+for card in cards["cards"]:
+    print(card["value"], card["suit"], card["code"])
+
+# Get the value of the cards
+values = [card["value"] for card in cards["cards"]]
+
+# Count the number of cards with the same value
+for value in values:
+    if value in value_counts:
+        value_counts[value] += 1
+    else:
+        value_counts[value] = 1
+
+# Print the number of cards with the same value
+for value, count in value_counts.items():
+    if count > 1:
+        print(f"Congratulations, {count} cards have the value {value}")
+        
+# Sorts the values according to the value mapping
+sorted_values = sorted(values, key=lambda x: value_mapping[x]) 
+
+# Check for a straight
 for i in range(len(sorted_values) - 1):
     if value_mapping[sorted_values[i]] + 1 != value_mapping[sorted_values[i + 1]]: # checks if the next value is one more than the current value
-        print("The hand is not a straight.")    
         break
-else:
-    print("The hand is not a straight.")
+    else:
+        print("Congratulations! The hand is a straight.")
 
 # Check all of the same suit
 suits = [card["suit"] for card in cards["cards"]]
 if all(suit == suits[0] for suit in suits):
-    print("All cards are of the same suit.")
-else:
-    print("Not all cards are of the same suit.")
-    
-# Check for pair, triple, straight or all of the same suit
+    print("Congratulations! All cards are of the same suit.")
+
+
+
