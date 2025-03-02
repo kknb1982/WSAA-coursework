@@ -1,35 +1,30 @@
 # Read in a file from a repository, replace all instances of the word "Andrew" with "Kirstin", and write the modified file back to the repository.
 # Author: Kirstin Barnett
 
-import requests
-import json
+from github import Github
 from config import apikeys as cfg
+import requests
 
 
 filename = "classlist.txt"
 apikey = cfg["apikeys"]
-url = "https://github.com/kknb1982/WSAA-coursework/"
+g = Github(apikey)
+repository = "kknb1982/WSAA-coursework"
 
 # Access the repository
-response = requests.get(url, auth = ('token', apikey))
-print (response.status_code)
+repo = g.get_repo(repository)
 
-# Access the file from the repository
-with open(filename, 'r') as fp:
-    content = fp.read()
-    print("File has been read from the repository.")
+# Get the download URL for the file
+file_info = repo.get_contents("classlist.txt")
+fileurl = file_info.download_url
 
-# Search for "Andrew" and replace with "Kirstin" in the JSON data
-updatedtxt = content.replace("Andrew", "Kirstin")
-print("Text has been modified.")
+# Output the content of the file
+response = requests.get(fileurl)
+filecontent = response.text
 
-with open (filename, "w") as fp:
-    fp.write(updatedtxt)
-    fp.close()
+# Update the content of the file
+newcontent = filecontent.replace("Andrew", "Kirstin")
 
-print("File has been searched and modified where needed.")
-
-# Write the modified file back to the repository
-response = requests.put(url,  auth=('token', apikey))
-print("File has been modified and written back to the repository.")
-
+# Write the updated content back to the file
+githubresponse = repo.update_file(file_info.path, "Replaced Andrew with Kirstin", newcontent, file_info.sha)
+print(githubresponse)
